@@ -16,6 +16,14 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function get<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}/api/v1${path}`);
+  if (!res.ok) {
+    throw new Error(`요청 실패 (${res.status})`);
+  }
+  return res.json() as Promise<T>;
+}
+
 const DEMO_USER_ID = "user_kim_sonja";
 
 /* ===== 대화형 AI (Gemini) ===== */
@@ -88,13 +96,34 @@ export function findNearbyBranches(
 
 /* ===== 번호표 예약 ===== */
 export type Reservation = {
+  reservation_id: string;
   ticket_number: number;
   purpose: string;
   message: string;
+  status: "active" | "canceled";
+  branch_name: string | null;
+  note: string | null;
 };
 
-export function createReservation(purpose: string): Promise<Reservation> {
-  return post("/reservation/tickets", { user_id: DEMO_USER_ID, purpose });
+export function createReservation(
+  purpose: string,
+  branch_name?: string,
+  note?: string,
+): Promise<Reservation> {
+  return post("/reservation/tickets", {
+    user_id: DEMO_USER_ID,
+    purpose,
+    ...(branch_name ? { branch_name } : {}),
+    ...(note ? { note } : {}),
+  });
+}
+
+export function listReservations(): Promise<Reservation[]> {
+  return get(`/reservation/tickets?user_id=${encodeURIComponent(DEMO_USER_ID)}`);
+}
+
+export function cancelReservation(reservationId: string): Promise<Reservation> {
+  return post(`/reservation/tickets/${reservationId}/cancel`, {});
 }
 
 /* ===== 이자 리포트 ===== */

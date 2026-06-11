@@ -2,12 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Mic, Send, Headset } from "lucide-react";
+import { ChevronLeft, Mic, Send, Headset, Ticket, MapPin, X } from "lucide-react";
 import { Mascot } from "@/components/Mascot";
 import {
   sendChatMessage,
   handoffToStaff,
+  createReservation,
+  findNearbyBranches,
   type ChatMessage,
+  type Reservation,
 } from "@/lib/api";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 
@@ -21,6 +24,8 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [handoff, setHandoff] = useState<string | null>(null);
+  const [issuing, setIssuing] = useState(false);
+  const [ticket, setTicket] = useState<Reservation | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -68,7 +73,25 @@ export default function ChatPage() {
     }
   }
 
+  async function issueTicket() {
+    if (issuing) return;
+    setIssuing(true);
+    try {
+      const branches = await findNearbyBranches();
+      setTicket(await createReservation("방문 상담", branches[0]?.name));
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: "번호표 발행에 실패했어요. 잠시 후 다시 시도해 주세요." },
+      ]);
+    } finally {
+      setIssuing(false);
+    }
+  }
+
   const started = messages.length > 1;
+  const lastMessage = messages[messages.length - 1];
+  const offersTicket = lastMessage.role === "assistant" && lastMessage.text.includes("번호표");
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-[#0b1026] via-[#141a3a] to-[#241a44] text-white">
@@ -120,6 +143,21 @@ export default function ChatPage() {
         )}
       </div>
 
+      {/* 번호표 받기 — AI가 번호표를 언급하면 노출 */}
+      {offersTicket && (
+        <div className="relative px-5 pb-2">
+          <button
+            type="button"
+            onClick={() => void issueTicket()}
+            disabled={issuing}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-jb-400 to-jb-600 px-5 py-3 text-lg font-bold text-white shadow-[0_10px_30px_-8px_rgba(74,131,192,0.7)] active:scale-[0.98] disabled:opacity-50"
+          >
+            <Ticket className="size-6" aria-hidden />
+            {issuing ? "번호표를 받는 중…" : "번호표 받기"}
+          </button>
+        </div>
+      )}
+
       {/* 직원 전달 */}
       {started && (
         <div className="relative px-5">
@@ -132,6 +170,41 @@ export default function ChatPage() {
             <Headset className="size-6" aria-hidden />
             가까운 지점 직원에게 전달하기
           </button>
+        </div>
+      )}
+
+      {/* 번호표 발행 팝업 */}
+      {ticket && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 px-6 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-7 text-center text-slate-900 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setTicket(null)}
+              aria-label="닫기"
+              className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 active:scale-95"
+            >
+              <X className="size-5" aria-hidden />
+            </button>
+            <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-gradient-to-b from-jb-400 to-jb-700 text-white">
+              <Ticket className="size-8" aria-hidden />
+            </span>
+            {ticket.branch_name && (
+              <p className="mt-4 flex items-center justify-center gap-1 text-base text-slate-500">
+                <MapPin className="size-4" aria-hidden />
+                {ticket.branch_name}
+              </p>
+            )}
+            <p className="mt-1 text-lg text-jb-700">내 번호표</p>
+            <p className="mt-1 text-7xl font-black text-jb-700">{ticket.ticket_number}</p>
+            <p className="mt-4 text-lg leading-relaxed text-slate-700">{ticket.message}</p>
+            <button
+              type="button"
+              onClick={() => setTicket(null)}
+              className="mt-6 w-full rounded-2xl bg-gradient-to-b from-jb-500 to-jb-700 px-6 py-4 text-xl font-bold text-white active:scale-[0.98]"
+            >
+              확인
+            </button>
+          </div>
         </div>
       )}
 

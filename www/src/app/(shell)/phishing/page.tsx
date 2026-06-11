@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Mic } from "lucide-react";
 import { checkPhishing, type PhishingResult } from "@/lib/api";
+import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 
 // signal_color → 화면 색. 타입 분기 대신 매핑 테이블.
 const palette: Record<string, { ring: string; text: string; bg: string; dot: string }> = {
@@ -16,6 +17,10 @@ export default function PhishingPage() {
   const [message, setMessage] = useState("");
   const [result, setResult] = useState<PhishingResult | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const { supported: micSupported, listening, toggle } = useSpeechRecognition(
+    (text) => setMessage((prev) => prev ? prev + " " + text : text),
+  );
 
   async function check() {
     if (!message.trim() || loading) return;
@@ -48,6 +53,21 @@ export default function PhishingPage() {
         placeholder="예: 검찰청인데요, 계좌가 범죄에 연루되어 지금 송금하셔야 합니다"
         className="mt-5 w-full resize-none rounded-2xl border border-slate-200 bg-white px-5 py-4 text-lg leading-relaxed text-slate-800 placeholder:text-slate-400 focus:border-jb-400"
       />
+      {micSupported && (
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label="음성으로 입력하기"
+          className={`mt-2 flex w-full items-center justify-center gap-3 rounded-2xl border-2 py-4 text-lg font-bold transition active:scale-[0.98] ${
+            listening
+              ? "animate-pulse border-rose-300 bg-rose-50 text-rose-500"
+              : "border-slate-200 bg-white text-slate-500"
+          }`}
+        >
+          <Mic className="size-6" aria-hidden />
+          {listening ? "듣는 중… (탭하면 멈춰요)" : "말로 입력하기"}
+        </button>
+      )}
       <button
         type="button"
         onClick={check}
