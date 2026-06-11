@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f7fb;
+  --foreground: #1a2230;
+}
+
+@theme {
+  /* JB 금융그룹 톤 — 짙은 청색(네이비) 신뢰감 */
+  --color-jb-50: #eef4fb;
+  --color-jb-100: #d7e5f4;
+  --color-jb-200: #aecbe9;
+  --color-jb-300: #7ba8d6;
+  --color-jb-400: #4a83c0;
+  --color-jb-500: #2864a6;
+  --color-jb-600: #1a4d8c;
+  --color-jb-700: #003876; /* 메인 브랜드 네이비 */
+  --color-jb-800: #002a59;
+  --color-jb-900: #001c3d;
+
+  /* 시맨틱 — 보이스피싱 신호등 / 상태 표시 */
+  --color-safe: #1f8a4c;
+  --color-warning: #d98300;
+  --color-danger: #cf2e2e;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+@theme inline {
+  --font-sans: var(--font-noto-sans-kr), system-ui, sans-serif;
+}
+
+/* 노년층 가독성: 기본 글자 크기를 키운다 (모든 rem 단위가 함께 확대) */
+html {
+  font-size: 18px;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 키보드 포커스 가시성 강화 (접근성) */
+:focus-visible {
+  outline: 3px solid var(--color-jb-500);
+  outline-offset: 2px;
+}
+
+/* 가로 스와이프 영역 스크롤바 숨김 */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== 리퀴드 글래스 ===== */
+.glass {
+  background-color: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+.glass-strong {
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+/* 유리 위 살짝 떠 보이는 부드러운 그림자 */
+.shadow-glass {
+  box-shadow: 0 10px 30px -8px rgba(20, 50, 110, 0.18);
+}
+
+/* 토스풍 카드 — 또렷한 경계 + 부드러운 그림자 */
+.card {
+  background-color: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 8px 24px -10px rgba(20, 50, 110, 0.14);
+}
+
+/* ===== 마스코트 애니메이션 ===== */
+@keyframes mascot-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.mascot-bob {
+  animation: mascot-bob 3.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-bob {
+    animation: none;
+  }
+}

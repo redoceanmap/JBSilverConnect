@@ -19,6 +19,9 @@ class ReservationRepositoryPort(ABC):
     async def list_by_user(self, user_id: UserId) -> list[Reservation]: ...
 
     @abstractmethod
+    async def list_active_all(self) -> list[Reservation]: ...
+
+    @abstractmethod
     async def find_active(
         self, user_id: UserId, branch_name: str | None
     ) -> Reservation | None: ...

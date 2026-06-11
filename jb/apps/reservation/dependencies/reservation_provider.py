@@ -14,6 +14,7 @@ from jb.apps.reservation.app.ports.input.cancel_reservation_use_case import (
 from jb.apps.reservation.app.ports.input.create_reservation_use_case import (
     CreateReservationUseCase,
 )
+from jb.apps.reservation.app.ports.input.list_queue_use_case import ListQueueUseCase
 from jb.apps.reservation.app.ports.input.list_reservations_use_case import (
     ListReservationsUseCase,
 )
@@ -27,6 +28,7 @@ from jb.apps.reservation.app.use_cases.cancel_reservation_interactor import (
 from jb.apps.reservation.app.use_cases.create_reservation_interactor import (
     CreateReservationInteractor,
 )
+from jb.apps.reservation.app.use_cases.list_queue_interactor import ListQueueInteractor
 from jb.apps.reservation.app.use_cases.list_reservations_interactor import (
     ListReservationsInteractor,
 )
@@ -51,6 +53,10 @@ def get_create_reservation_use_case() -> CreateReservationUseCase:
 
 def get_list_reservations_use_case() -> ListReservationsUseCase:
     return ListReservationsInteractor(repository=_get_reservation_repository())
+
+
+def get_list_queue_use_case() -> ListQueueUseCase:
+    return ListQueueInteractor(repository=_get_reservation_repository())
 
 
 def get_cancel_reservation_use_case() -> CancelReservationUseCase:

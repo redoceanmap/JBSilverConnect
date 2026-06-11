@@ -23,6 +23,11 @@ class InMemoryReservationRepository(ReservationRepositoryPort):
     async def list_by_user(self, user_id: UserId) -> list[Reservation]:
         return [r for r in self._store.values() if r.user_id == user_id]
 
+    async def list_active_all(self) -> list[Reservation]:
+        return [
+            r for r in self._store.values() if r.status == ReservationStatus.ACTIVE
+        ]
+
     async def find_active(
         self, user_id: UserId, branch_name: str | None
     ) -> Reservation | None:

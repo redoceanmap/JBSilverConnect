@@ -18,12 +18,14 @@ from jb.apps.reservation.app.ports.input.cancel_reservation_use_case import (
 from jb.apps.reservation.app.ports.input.create_reservation_use_case import (
     CreateReservationUseCase,
 )
+from jb.apps.reservation.app.ports.input.list_queue_use_case import ListQueueUseCase
 from jb.apps.reservation.app.ports.input.list_reservations_use_case import (
     ListReservationsUseCase,
 )
 from jb.apps.reservation.dependencies.reservation_provider import (
     get_cancel_reservation_use_case,
     get_create_reservation_use_case,
+    get_list_queue_use_case,
     get_list_reservations_use_case,
 )
 
@@ -64,6 +66,15 @@ async def list_reservations(
     usecase: ListReservationsUseCase = Depends(get_list_reservations_use_case),
 ) -> list[ReservationResponse]:
     views = await usecase.execute(ListReservationsQuery(user_id=user_id))
+    return [_to_response(view) for view in views]
+
+
+@reservation_router.get("/queue", response_model=list[ReservationResponse])
+async def list_queue(
+    usecase: ListQueueUseCase = Depends(get_list_queue_use_case),
+) -> list[ReservationResponse]:
+    """창구(어드민)용 — 전체 활성 번호표를 번호순으로 조회한다."""
+    views = await usecase.execute()
     return [_to_response(view) for view in views]
 
 

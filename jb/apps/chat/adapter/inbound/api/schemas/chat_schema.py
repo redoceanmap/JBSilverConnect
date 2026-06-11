@@ -12,10 +12,29 @@ class ChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(..., description="지금까지의 대화(최신 사용자 발화 포함)")
 
 
+class HandoffRequest(ChatRequest):
+    user_id: str = Field("user_kim_sonja", description="어르신 사용자 ID")
+
+
 class ChatReplyResponse(BaseModel):
     reply: str
 
 
+class HandoffCardResponse(BaseModel):
+    handoff_id: str
+    customer_name: str
+    customer_age: int
+    ticket_number: int
+    eta_text: str
+    purpose: str
+    target: str
+    amount: str
+    required_docs: str
+    special_notes: str
+    advice: str
+    original_message: str
+
+
 class HandoffResponse(BaseModel):
-    summary: str
+    card: HandoffCardResponse
     confirm_message: str

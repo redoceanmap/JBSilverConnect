@@ -5,6 +5,7 @@ from jb.apps.branch.app.ports.input.find_nearby_branches_use_case import (
     FindNearbyBranchesUseCase,
 )
 from jb.apps.branch.app.ports.output.map_port import MapPort
+from jb.apps.branch.app.use_cases.branch_view_mapper import to_view
 from jb.apps.branch.domain.value_objects.branch_vo import GeoCoordinate
 
 
@@ -18,11 +19,4 @@ class FindNearbyBranchesInteractor(FindNearbyBranchesUseCase):
         origin = GeoCoordinate(command.latitude, command.longitude)
         branches = await self._map.find_nearby(origin, command.limit)
         ordered = sorted(branches, key=lambda branch: branch.distance.meters)
-        return [
-            BranchView(
-                name=branch.name,
-                distance_meters=branch.distance.meters,
-                waiting_count=branch.wait_status.waiting_count,
-            )
-            for branch in ordered
-        ]
+        return [to_view(branch) for branch in ordered]
