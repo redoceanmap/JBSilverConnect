@@ -37,3 +37,6 @@ for _router in (
 @app.get("/")
 async def read_root() -> dict[str, str]:
     return {"message": "JB Silver Connect API", "docs": "/docs"}
+
+
+
