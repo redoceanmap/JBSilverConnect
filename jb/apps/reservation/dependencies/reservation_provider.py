@@ -2,15 +2,33 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from jb.apps.reservation.adapter.outbound.mock.in_memory_reservation_repository import (
+    InMemoryReservationRepository,
+)
 from jb.apps.reservation.adapter.outbound.mock.mock_ticket_dispenser import (
     MockTicketDispenser,
+)
+from jb.apps.reservation.app.ports.input.cancel_reservation_use_case import (
+    CancelReservationUseCase,
 )
 from jb.apps.reservation.app.ports.input.create_reservation_use_case import (
     CreateReservationUseCase,
 )
+from jb.apps.reservation.app.ports.input.list_reservations_use_case import (
+    ListReservationsUseCase,
+)
+from jb.apps.reservation.app.ports.output.reservation_repository_port import (
+    ReservationRepositoryPort,
+)
 from jb.apps.reservation.app.ports.output.ticket_dispenser_port import TicketDispenserPort
+from jb.apps.reservation.app.use_cases.cancel_reservation_interactor import (
+    CancelReservationInteractor,
+)
 from jb.apps.reservation.app.use_cases.create_reservation_interactor import (
     CreateReservationInteractor,
+)
+from jb.apps.reservation.app.use_cases.list_reservations_interactor import (
+    ListReservationsInteractor,
 )
 
 
@@ -19,5 +37,21 @@ def _get_ticket_dispenser() -> TicketDispenserPort:
     return MockTicketDispenser()
 
 
+@lru_cache
+def _get_reservation_repository() -> ReservationRepositoryPort:
+    return InMemoryReservationRepository()
+
+
 def get_create_reservation_use_case() -> CreateReservationUseCase:
-    return CreateReservationInteractor(dispenser=_get_ticket_dispenser())
+    return CreateReservationInteractor(
+        dispenser=_get_ticket_dispenser(),
+        repository=_get_reservation_repository(),
+    )
+
+
+def get_list_reservations_use_case() -> ListReservationsUseCase:
+    return ListReservationsInteractor(repository=_get_reservation_repository())
+
+
+def get_cancel_reservation_use_case() -> CancelReservationUseCase:
+    return CancelReservationInteractor(repository=_get_reservation_repository())

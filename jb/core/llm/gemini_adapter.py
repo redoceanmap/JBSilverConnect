@@ -17,7 +17,7 @@ class GeminiAdapter(LlmPort):
 
         client = genai.Client(api_key=self._api_key)
         response = client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-3.1-flash-lite",
             contents=prompt,
         )
         return response.text

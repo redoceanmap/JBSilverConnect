@@ -1,6 +1,14 @@
 from __future__ import annotations
 
+import enum
 from dataclasses import dataclass
+
+
+class ReservationStatus(enum.Enum):
+    """예약 번호표 상태. 취소된 번호표도 이력으로 보존된다."""
+
+    ACTIVE = "active"
+    CANCELED = "canceled"
 
 
 @dataclass(frozen=True)
