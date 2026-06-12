@@ -1,5 +1,5 @@
-// JB Silver Connect 창구 단말 API 클라이언트.
-// 어르신 앱이 보낸 방문 내용을 GET /queue/entries 로 조회하고,
+// JB AI Connect 창구 단말 API 클라이언트.
+// 고객님 앱이 보낸 방문 내용을 GET /queue/entries 로 조회하고,
 // 도착 인증(arrive)·호출(call)로 대기열 상태를 전환한다.
 
 const BASE_URL =
@@ -22,12 +22,15 @@ async function post(path: string): Promise<void> {
 
 /* ===== 창구 대기열 카드 ===== */
 export type QueueStatus = "waiting" | "on_site" | "called";
+export type WindowType = "general" | "corporate";
 
 export type HandoffCard = {
   handoff_id: string;
   customer_name: string;
   customer_age: number;
   ticket_number: number;
+  ticket_label: string;
+  window_type: WindowType;
   eta_text: string;
   purpose: string;
   target: string;

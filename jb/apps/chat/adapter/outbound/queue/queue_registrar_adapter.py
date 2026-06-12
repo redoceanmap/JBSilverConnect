@@ -34,5 +34,6 @@ class QueueRegistrarAdapter(QueueRegistrarPort):
                 advice=briefing.advice,
                 original_message=handoff.original_message,
                 created_at=created_at,
+                window_type=briefing.window_type,
             )
         )

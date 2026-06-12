@@ -8,6 +8,7 @@ from jb.apps.queue.app.ports.output.queue_entry_repository_port import (
     QueueEntryRepositoryPort,
 )
 from jb.apps.queue.domain.entities.queue_entry_entity import QueueEntry
+from jb.shared_kernel.value_objects import window_type_from_code
 
 
 class RegisterQueueEntryInteractor(RegisterQueueEntryUseCase):
@@ -29,5 +30,6 @@ class RegisterQueueEntryInteractor(RegisterQueueEntryUseCase):
             advice=command.advice,
             original_message=command.original_message,
             created_at=command.created_at,
+            window_type=window_type_from_code(command.window_type),
         )
         await self._repository.save(entry)

@@ -9,6 +9,7 @@ class CreateReservationCommand:
     purpose: str
     branch_name: str | None = None
     note: str | None = None
+    window_type: str = "general"
 
 
 @dataclass(frozen=True)
@@ -25,6 +26,8 @@ class CancelReservationCommand:
 class ReservationView:
     reservation_id: str
     ticket_number: int
+    ticket_label: str
+    window_type: str
     purpose: str
     message: str
     status: str

@@ -47,7 +47,7 @@ class StaffHandoffCardView:
 
 @dataclass(frozen=True)
 class StaffHandoffView:
-    """전달 직후 어르신에게 돌려줄 응답 — 카드 + 안심 메시지."""
+    """전달 직후 고객님에게 돌려줄 응답 — 카드 + 안심 메시지."""
 
     card: StaffHandoffCardView
     confirm_message: str

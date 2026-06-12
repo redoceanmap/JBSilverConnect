@@ -19,6 +19,7 @@ class RegisterQueueEntryCommand:
     advice: str
     original_message: str
     created_at: datetime
+    window_type: str = "general"
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,8 @@ class QueueEntryCardView:
     customer_name: str
     customer_age: int
     ticket_number: int
+    ticket_label: str
+    window_type: str
     eta_text: str
     purpose: str
     target: str

@@ -16,16 +16,17 @@ from jb.core.ports.llm_port import LlmPort
 from jb.shared_kernel.value_objects import UserId
 
 _HANDOFF_INSTRUCTION = (
-    "다음은 노년층 고객과 JB 도우미가 나눈 대화다. "
+    "다음은 고객과 AI 도우미가 나눈 대화다. "
     "은행 창구 직원이 한눈에 파악하도록 아래 JSON 형식으로만 정리해라. "
     "JSON 외의 다른 말이나 코드펜스 설명은 출력하지 마라.\n"
     "{\n"
     '  "purpose": "방문 목적 (예: 현금 입금 + 통장 정리)",\n'
-    '  "target": "관련 계좌/상품 (예: 전북은행 입출금통장)",\n'
+    '  "target": "관련 계좌/상품 (예: 입출금통장)",\n'
     '  "amount": "관련 금액 (예: 현금 약 5만 원, 없으면 \'해당 없음\')",\n'
     '  "required_docs": "필요 서류 (예: 통장·신분증)",\n'
-    '  "special_notes": "특이사항 (예: 천천히 설명 필요)",\n'
-    '  "advice": "직원이 미리 준비하면 좋을 점을 정중한 한 문장으로"\n'
+    '  "special_notes": "특이사항 (없으면 \'해당 없음\')",\n'
+    '  "advice": "직원이 미리 준비하면 좋을 점을 정중한 한 문장으로",\n'
+    '  "window_type": "창업·사업자등록·법인설립·법인통장 등 법인 사무면 \'corporate\', 그 외 개인 업무면 \'general\'"\n'
     "}\n\n"
     "[대화]\n"
 )

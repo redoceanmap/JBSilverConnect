@@ -26,6 +26,8 @@ def _to_card_response(card: QueueEntryCardView) -> QueueEntryCardResponse:
         customer_name=card.customer_name,
         customer_age=card.customer_age,
         ticket_number=card.ticket_number,
+        ticket_label=card.ticket_label,
+        window_type=card.window_type,
         eta_text=card.eta_text,
         purpose=card.purpose,
         target=card.target,

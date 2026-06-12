@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MessageCircle, Sun, Ticket, MapPin } from "lucide-react";
+import { Home, MessageCircle, Ticket, MapPin } from "lucide-react";
 
 const tabs = [
   { href: "/", label: "홈", icon: Home },
   { href: "/chat", label: "대화", icon: MessageCircle },
-  { href: "/briefing", label: "브리핑", icon: Sun },
   { href: "/reservation", label: "예약", icon: Ticket },
   { href: "/branch", label: "지점", icon: MapPin },
 ];

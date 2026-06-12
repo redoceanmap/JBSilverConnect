@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from jb.apps.queue.domain.value_objects.queue_vo import QueueStatus
+from jb.shared_kernel.value_objects import WindowType
 
 # 대기 30분 미도착 시 파기, 호출 1분 뒤 자동 삭제.
 _WAIT_LIMIT = timedelta(minutes=30)
@@ -30,6 +31,7 @@ class QueueEntry:
     advice: str
     original_message: str
     created_at: datetime
+    window_type: WindowType = WindowType.GENERAL
     status: QueueStatus = QueueStatus.WAITING
     called_at: datetime | None = None
 
@@ -65,6 +67,10 @@ class QueueEntry:
     def ticket_number(self, position: int) -> int:
         """대기열 위치(0부터)를 대기번호로 환산한다."""
         return position + 1
+
+    def ticket_label(self, position: int) -> str:
+        """창구 종류 접두가 붙은 대기번호 표기. 예: 법인 2번 → 'B2'."""
+        return self.window_type.format_ticket(self.ticket_number(position))
 
     def eta_text(self, position: int) -> str:
         """앞선 대기 인원으로 도착 예상 시간을 안내한다."""

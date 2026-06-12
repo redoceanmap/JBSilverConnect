@@ -13,3 +13,4 @@ class VisitBriefing:
     required_docs: str
     special_notes: str
     advice: str
+    window_type: str = "general"

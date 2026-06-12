@@ -1,6 +1,33 @@
 from __future__ import annotations
 
+import enum
 from dataclasses import dataclass
+
+
+class WindowType(enum.Enum):
+    """창구 종류. 멤버가 번호표 접두를 들고 직접 번호를 포맷한다(타입 분기 회피).
+
+    GENERAL(일반): 접두 없음. CORPORATE(법인 사무): 'B' 접두로 법인 창구에서 구별 호출.
+    """
+
+    GENERAL = ("general", "")
+    CORPORATE = ("corporate", "B")
+
+    def __init__(self, code: str, ticket_prefix: str) -> None:
+        self.code = code
+        self.ticket_prefix = ticket_prefix
+
+    def format_ticket(self, number: int) -> str:
+        """대기번호에 창구 접두를 붙인다. 예: 법인 3번 → 'B3'."""
+        return f"{self.ticket_prefix}{number}"
+
+
+def window_type_from_code(code: str) -> WindowType:
+    """창구 종류 코드 문자열을 WindowType으로 해석한다. 미일치 시 일반 창구로 본다."""
+    for window_type in WindowType:
+        if window_type.code == code:
+            return window_type
+    return WindowType.GENERAL
 
 
 @dataclass(frozen=True)

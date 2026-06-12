@@ -2,11 +2,18 @@ from __future__ import annotations
 
 from functools import lru_cache
 
+from jb.apps.queue.dependencies.queue_provider import (
+    get_register_queue_entry_use_case,
+    get_remove_queue_entry_use_case,
+)
 from jb.apps.reservation.adapter.outbound.mock.in_memory_reservation_repository import (
     InMemoryReservationRepository,
 )
 from jb.apps.reservation.adapter.outbound.mock.mock_ticket_dispenser import (
     MockTicketDispenser,
+)
+from jb.apps.reservation.adapter.outbound.queue.reservation_queue_registrar_adapter import (
+    ReservationQueueRegistrarAdapter,
 )
 from jb.apps.reservation.app.ports.input.cancel_reservation_use_case import (
     CancelReservationUseCase,
@@ -32,6 +39,9 @@ from jb.apps.reservation.app.use_cases.list_queue_interactor import ListQueueInt
 from jb.apps.reservation.app.use_cases.list_reservations_interactor import (
     ListReservationsInteractor,
 )
+from jb.core.customer.mock_customer_directory import MockCustomerDirectory
+from jb.core.di import get_llm
+from jb.core.ports.customer_directory_port import CustomerDirectoryPort
 
 
 @lru_cache
@@ -44,10 +54,25 @@ def _get_reservation_repository() -> ReservationRepositoryPort:
     return InMemoryReservationRepository()
 
 
+@lru_cache
+def _get_customer_directory() -> CustomerDirectoryPort:
+    return MockCustomerDirectory()
+
+
+def _get_queue_registrar() -> ReservationQueueRegistrarAdapter:
+    return ReservationQueueRegistrarAdapter(
+        get_register_queue_entry_use_case(),
+        get_remove_queue_entry_use_case(),
+    )
+
+
 def get_create_reservation_use_case() -> CreateReservationUseCase:
     return CreateReservationInteractor(
         dispenser=_get_ticket_dispenser(),
         repository=_get_reservation_repository(),
+        customer_directory=_get_customer_directory(),
+        queue_registrar=_get_queue_registrar(),
+        llm=get_llm(),
     )
 
 
@@ -60,4 +85,7 @@ def get_list_queue_use_case() -> ListQueueUseCase:
 
 
 def get_cancel_reservation_use_case() -> CancelReservationUseCase:
-    return CancelReservationInteractor(repository=_get_reservation_repository())
+    return CancelReservationInteractor(
+        repository=_get_reservation_repository(),
+        queue_registrar=_get_queue_registrar(),
+    )

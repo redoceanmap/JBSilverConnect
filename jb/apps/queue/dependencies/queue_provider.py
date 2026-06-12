@@ -13,6 +13,9 @@ from jb.apps.queue.app.ports.input.list_queue_entries_use_case import (
 from jb.apps.queue.app.ports.input.register_queue_entry_use_case import (
     RegisterQueueEntryUseCase,
 )
+from jb.apps.queue.app.ports.input.remove_queue_entry_use_case import (
+    RemoveQueueEntryUseCase,
+)
 from jb.apps.queue.app.ports.output.queue_entry_repository_port import (
     QueueEntryRepositoryPort,
 )
@@ -26,6 +29,9 @@ from jb.apps.queue.app.use_cases.list_queue_entries_interactor import (
 from jb.apps.queue.app.use_cases.register_queue_entry_interactor import (
     RegisterQueueEntryInteractor,
 )
+from jb.apps.queue.app.use_cases.remove_queue_entry_interactor import (
+    RemoveQueueEntryInteractor,
+)
 
 
 @lru_cache
@@ -35,6 +41,10 @@ def _get_queue_repository() -> QueueEntryRepositoryPort:
 
 def get_register_queue_entry_use_case() -> RegisterQueueEntryUseCase:
     return RegisterQueueEntryInteractor(repository=_get_queue_repository())
+
+
+def get_remove_queue_entry_use_case() -> RemoveQueueEntryUseCase:
+    return RemoveQueueEntryInteractor(repository=_get_queue_repository())
 
 
 def get_confirm_arrival_use_case() -> ConfirmArrivalUseCase:

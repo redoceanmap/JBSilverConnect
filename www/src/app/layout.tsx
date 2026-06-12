@@ -10,9 +10,9 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "JB SliverConnect | 어르신을 위한 든든한 금융 도우미",
+  title: "JB AI Connect | 고객님을 위한 든든한 금융 도우미",
   description:
-    "전북·광주은행 JB금융그룹의 시니어 안심 금융 서비스. 적금 제안, 보이스피싱 확인, 가까운 지점 찾기까지 AI가 도와드립니다.",
+    "전북·광주은행 JB금융그룹의 AI 금융 서비스. 가까운 지점 찾기, 번호표 예약, 창업·법인 사무 안내까지 AI가 도와드립니다.",
 };
 
 export default function RootLayout({

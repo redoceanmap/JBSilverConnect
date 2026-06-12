@@ -10,4 +10,4 @@ class MockLlmAdapter(LlmPort):
     """
 
     async def generate(self, prompt: str) -> str:
-        return "어르신, 준비된 안내를 알려드릴게요. (데모 응답)"
+        return "고객님, 준비된 안내를 알려드릴게요. (데모 응답)"

@@ -2,42 +2,68 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, Mic, Send, Headset, Ticket, MapPin, X } from "lucide-react";
+import { ChevronLeft, Mic, Send, CalendarCheck, Ticket, MapPin, X, Building2 } from "lucide-react";
 import { Mascot } from "@/components/Mascot";
 import {
   sendChatMessage,
-  handoffToStaff,
   createReservation,
   findNearbyBranches,
+  requestCorporateGuidance,
   type ChatMessage,
   type Reservation,
+  type CorporateGuidance,
+  type GuidanceTopic,
 } from "@/lib/api";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 
 const GREETING: ChatMessage = {
   role: "assistant",
-  text: "안녕하세요! 무엇을 도와드릴까요? 말로 하셔도 되고, 글로 적으셔도 돼요. 사투리도 괜찮아요 😊",
+  text: "안녕하세요! 무엇을 도와드릴까요? 말로 하셔도 되고, 글로 적으셔도 돼요 😊",
 };
+
+// 창업·법인 사무로 보이는 발화를 감지해 '법인 사무 안내 받기' 버튼을 띄운다.
+const CORPORATE_KEYWORDS = ["창업", "사업자", "법인", "사업자등록", "사업자통장", "통장 발급"];
+// 부동산 담보대출로 보이는 발화를 감지해 '필요 서류 안내 받기' 버튼을 띄운다.
+const MORTGAGE_KEYWORDS = ["담보대출", "담보 대출", "주택담보", "부동산 담보"];
+
+const GUIDANCE_TITLES: Record<GuidanceTopic, string> = {
+  corporate: "법인 사무 준비 안내",
+  mortgage: "부동산 담보대출 필요 서류 안내",
+};
+
+function formatDistance(meters: number): string {
+  if (meters >= 1000) return `${(meters / 1000).toFixed(1)}km`;
+  return `${meters}m`;
+}
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([GREETING]);
-  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
-  const [handoff, setHandoff] = useState<string | null>(null);
   const [issuing, setIssuing] = useState(false);
   const [ticket, setTicket] = useState<Reservation | null>(null);
+  const [guiding, setGuiding] = useState(false);
+  const [guidance, setGuidance] = useState<CorporateGuidance | null>(null);
+  const [guidanceTopic, setGuidanceTopic] = useState<GuidanceTopic>("corporate");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, loading, handoff]);
+  }, [messages, loading, guidance]);
+
+  function readAndClearInput(): string {
+    const el = inputRef.current;
+    if (!el) return "";
+    const val = el.value;
+    el.value = "";
+    return val;
+  }
 
   async function sendText(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
     const next = [...messages, { role: "user" as const, text: trimmed }];
     setMessages(next);
-    setInput("");
     setLoading(true);
     try {
       const { reply } = await sendChatMessage(next);
@@ -53,25 +79,11 @@ export default function ChatPage() {
   }
 
   const { supported: micSupported, listening, toggle } = useSpeechRecognition(
-    (text) => void sendText(text),
+    (text) => {
+      if (inputRef.current) inputRef.current.value = "";
+      void sendText(text);
+    },
   );
-
-  async function requestHandoff() {
-    if (loading) return;
-    setLoading(true);
-    try {
-      const { summary, confirm_message } = await handoffToStaff(messages);
-      setHandoff(summary);
-      setMessages((prev) => [...prev, { role: "assistant", text: confirm_message }]);
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", text: "직원 연결에 실패했어요. 잠시 후 다시 시도해 주세요." },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function issueTicket() {
     if (issuing) return;
@@ -89,9 +101,39 @@ export default function ChatPage() {
     }
   }
 
+  async function requestGuidance(topic: GuidanceTopic) {
+    if (guiding) return;
+    setGuiding(true);
+    setGuidanceTopic(topic);
+    const run = (lat?: number, lng?: number) =>
+      requestCorporateGuidance(lat, lng, topic)
+        .then(setGuidance)
+        .catch(() =>
+          setMessages((prev) => [
+            ...prev,
+            { role: "assistant", text: "안내를 불러오지 못했어요. 잠시 후 다시 시도해 주세요." },
+          ]),
+        )
+        .finally(() => setGuiding(false));
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => void run(pos.coords.latitude, pos.coords.longitude),
+        () => void run(),
+      );
+    } else {
+      void run();
+    }
+  }
+
   const started = messages.length > 1;
   const lastMessage = messages[messages.length - 1];
   const offersTicket = lastMessage.role === "assistant" && lastMessage.text.includes("번호표");
+  const offersCorporate =
+    !guidance &&
+    messages.some((m) => CORPORATE_KEYWORDS.some((keyword) => m.text.includes(keyword)));
+  const offersMortgage =
+    !guidance &&
+    messages.some((m) => MORTGAGE_KEYWORDS.some((keyword) => m.text.includes(keyword)));
 
   return (
     <div className="relative flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-[#0b1026] via-[#141a3a] to-[#241a44] text-white">
@@ -108,7 +150,7 @@ export default function ChatPage() {
         </Link>
         <span className="flex items-center gap-2 text-base font-semibold text-white/70">
           <Mascot className="size-8" still />
-          JB 도우미
+          AI 도우미
         </span>
         <span className="size-11" />
       </div>
@@ -133,15 +175,37 @@ export default function ChatPage() {
           </div>
         )}
 
-        {handoff && (
-          <div className="rounded-3xl border border-jb-300/40 bg-jb-700/40 px-5 py-4 backdrop-blur">
-            <p className="text-base font-bold text-jb-100">📋 직원에게 전달된 내용</p>
-            <p className="mt-2 whitespace-pre-line text-lg leading-relaxed text-white/90">
-              {handoff}
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* 법인 사무 안내 — 창업·법인 키워드가 보이면 노출 */}
+      {offersCorporate && (
+        <div className="relative px-5 pb-2">
+          <button
+            type="button"
+            onClick={() => void requestGuidance("corporate")}
+            disabled={guiding}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-amber-400 to-amber-600 px-5 py-3 text-lg font-bold text-white shadow-[0_10px_30px_-8px_rgba(217,160,60,0.7)] active:scale-[0.98] disabled:opacity-50"
+          >
+            <Building2 className="size-6" aria-hidden />
+            {guiding ? "안내를 불러오는 중…" : "법인 사무 안내 받기"}
+          </button>
+        </div>
+      )}
+
+      {/* 부동산 담보대출 필요 서류 안내 — 담보대출 키워드가 보이면 노출 */}
+      {offersMortgage && (
+        <div className="relative px-5 pb-2">
+          <button
+            type="button"
+            onClick={() => void requestGuidance("mortgage")}
+            disabled={guiding}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-b from-amber-400 to-amber-600 px-5 py-3 text-lg font-bold text-white shadow-[0_10px_30px_-8px_rgba(217,160,60,0.7)] active:scale-[0.98] disabled:opacity-50"
+          >
+            <Building2 className="size-6" aria-hidden />
+            {guiding ? "안내를 불러오는 중…" : "필요 서류 안내 받기"}
+          </button>
+        </div>
+      )}
 
       {/* 번호표 받기 — AI가 번호표를 언급하면 노출 */}
       {offersTicket && (
@@ -158,18 +222,75 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* 직원 전달 */}
+      {/* 은행 방문 예약 — 지점 번호표 예약 페이지로 이동 */}
       {started && (
         <div className="relative px-5">
-          <button
-            type="button"
-            onClick={requestHandoff}
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-lg font-bold text-white backdrop-blur active:scale-[0.98] disabled:opacity-50"
+          <Link
+            href="/reservation"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 py-3 text-lg font-bold text-white backdrop-blur active:scale-[0.98]"
           >
-            <Headset className="size-6" aria-hidden />
-            가까운 지점 직원에게 전달하기
-          </button>
+            <CalendarCheck className="size-6" aria-hidden />
+            은행 방문 예약
+          </Link>
+        </div>
+      )}
+
+      {/* 법인 사무 안내 팝업 — 버튼을 누르면 필요 서류·예상 비용·발급 기관이 바로 뜬다 */}
+      {guidance && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/60 px-6 py-8 backdrop-blur-sm">
+          <div className="relative flex max-h-full w-full max-w-sm flex-col rounded-3xl bg-white text-left text-slate-900 shadow-2xl">
+            <button
+              type="button"
+              onClick={() => setGuidance(null)}
+              aria-label="닫기"
+              className="absolute right-4 top-4 z-10 flex size-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 active:scale-95"
+            >
+              <X className="size-5" aria-hidden />
+            </button>
+            <div className="overflow-y-auto px-6 pb-2 pt-6">
+              <p className="flex items-center gap-2 text-xl font-black text-amber-700">
+                <Building2 className="size-6 shrink-0" aria-hidden />
+                {GUIDANCE_TITLES[guidanceTopic]}
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-500">{guidance.message}</p>
+              <div className="mt-4 space-y-3">
+                {guidance.tasks.map((task) => (
+                  <div
+                    key={task.task_name}
+                    className="rounded-2xl border border-amber-100 bg-amber-50 p-4"
+                  >
+                    <p className="text-base font-black text-slate-900">{task.task_name}</p>
+                    <p className="mt-1 text-sm text-slate-700">
+                      필요 서류: {task.required_docs.join(", ")}
+                    </p>
+                    <p className="text-sm text-slate-700">예상 비용: {task.estimated_cost}</p>
+                    <p className="mt-2 text-xs font-bold text-amber-700">발급 기관 (가까운 순)</p>
+                    <ul className="mt-1 space-y-1">
+                      {task.institutions.map((inst, idx) => (
+                        <li
+                          key={inst.name}
+                          className="flex items-center gap-1 text-sm text-slate-700"
+                        >
+                          <MapPin className="size-3.5 shrink-0 text-amber-500" aria-hidden />
+                          <span className="font-bold">{idx + 1}.</span> {inst.kind} · {inst.name} (
+                          {formatDistance(inst.distance_meters)})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="px-6 pb-6 pt-3">
+              <button
+                type="button"
+                onClick={() => setGuidance(null)}
+                className="w-full rounded-2xl bg-gradient-to-b from-amber-400 to-amber-600 px-6 py-4 text-xl font-bold text-white active:scale-[0.98]"
+              >
+                확인
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -195,7 +316,7 @@ export default function ChatPage() {
               </p>
             )}
             <p className="mt-1 text-lg text-jb-700">내 번호표</p>
-            <p className="mt-1 text-7xl font-black text-jb-700">{ticket.ticket_number}</p>
+            <p className="mt-1 text-7xl font-black text-jb-700">{ticket.ticket_label}</p>
             <p className="mt-4 text-lg leading-relaxed text-slate-700">{ticket.message}</p>
             <p className="mt-4 rounded-2xl bg-jb-50 px-4 py-3 text-base font-bold leading-relaxed text-jb-700">
               번호표를 은행 도착해서 안내데스크에 보여주세요.
@@ -214,10 +335,10 @@ export default function ChatPage() {
       {/* 입력 바 */}
       <div className="relative flex items-end gap-2 px-5 pb-6 pt-3">
         <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          ref={inputRef}
+          type="text"
           onKeyDown={(e) => {
-            if (e.key === "Enter") void sendText(input);
+            if (e.key === "Enter") void sendText(readAndClearInput());
           }}
           placeholder="여기에 말씀을 적어 주세요"
           aria-label="메시지 입력"
@@ -239,8 +360,8 @@ export default function ChatPage() {
         )}
         <button
           type="button"
-          onClick={() => void sendText(input)}
-          disabled={loading || !input.trim()}
+          onClick={() => void sendText(readAndClearInput())}
+          disabled={loading}
           aria-label="보내기"
           className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-b from-jb-400 to-jb-600 text-white shadow-[0_10px_30px_-8px_rgba(74,131,192,0.7)] active:scale-95 disabled:opacity-40"
         >

@@ -8,6 +8,8 @@ def to_view(reservation: Reservation) -> ReservationView:
     return ReservationView(
         reservation_id=reservation.reservation_id,
         ticket_number=reservation.ticket.value,
+        ticket_label=reservation.ticket_label(),
+        window_type=reservation.window_type.code,
         purpose=reservation.purpose.value,
         message=reservation.guidance(),
         status=reservation.status.value,

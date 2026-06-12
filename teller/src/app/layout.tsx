@@ -10,9 +10,9 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "JB SilverConnect | 창구 단말",
+  title: "JB AI Connect | 창구 단말",
   description:
-    "어르신 앱에서 미리 전달된 방문 내용을 창구 직원이 실시간으로 확인하는 단말 화면.",
+    "고객님 앱에서 미리 전달된 방문 내용을 창구 직원이 실시간으로 확인하는 단말 화면.",
 };
 
 export default function RootLayout({

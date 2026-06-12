@@ -13,6 +13,8 @@ def to_card(entry: QueueEntry, position: int, now: datetime) -> QueueEntryCardVi
         customer_name=entry.customer_name,
         customer_age=entry.customer_age,
         ticket_number=entry.ticket_number(position),
+        ticket_label=entry.ticket_label(position),
+        window_type=entry.window_type.code,
         eta_text=entry.eta_text(position),
         purpose=entry.purpose,
         target=entry.target,

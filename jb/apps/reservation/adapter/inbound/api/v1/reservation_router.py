@@ -36,6 +36,8 @@ def _to_response(view: ReservationView) -> ReservationResponse:
     return ReservationResponse(
         reservation_id=view.reservation_id,
         ticket_number=view.ticket_number,
+        ticket_label=view.ticket_label,
+        window_type=view.window_type,
         purpose=view.purpose,
         message=view.message,
         status=view.status,
@@ -55,6 +57,7 @@ async def create_reservation(
             purpose=body.purpose,
             branch_name=body.branch_name,
             note=body.note,
+            window_type=body.window_type,
         )
     )
     return _to_response(view)

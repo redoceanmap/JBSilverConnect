@@ -7,7 +7,7 @@ from jb.apps.chat.domain.value_objects.chat_vo import Utterance
 
 @dataclass(frozen=True)
 class Conversation:
-    """어르신과 도우미가 주고받은 대화 전체."""
+    """고객님과 도우미가 주고받은 대화 전체."""
 
     utterances: tuple[Utterance, ...]
 

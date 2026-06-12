@@ -106,7 +106,7 @@ export default function TellerPage() {
         </span>
         <div>
           <h1 className="text-lg font-black text-slate-900">창구 단말</h1>
-          <p className="text-sm text-slate-500">전주지점 · 어르신 앱 사전 방문 안내</p>
+          <p className="text-sm text-slate-500">사전 방문 안내</p>
         </div>
         <div className="ml-auto flex items-center gap-4">
           <span className="rounded-full bg-jb-50 px-3 py-1 text-sm font-bold text-jb-700">
@@ -237,24 +237,36 @@ function Card({
   isNew: boolean;
   children: React.ReactNode;
 }) {
+  const isCorporate = card.window_type === "corporate";
   return (
     <article
-      className={`rounded-2xl border border-slate-200 bg-white p-5 shadow-sm ${
-        isNew ? "card-in" : ""
-      }`}
+      className={`rounded-2xl border bg-white p-5 shadow-sm ${
+        isCorporate
+          ? "border-amber-200 border-l-4 border-l-amber-500 bg-amber-50/40"
+          : "border-slate-200"
+      } ${isNew ? "card-in" : ""}`}
     >
       {/* 고객 */}
       <div className="flex items-center gap-3">
-        <span className="flex size-11 items-center justify-center rounded-full bg-jb-50 text-jb-600">
+        <span
+          className={`flex size-11 items-center justify-center rounded-full ${
+            isCorporate ? "bg-amber-100 text-amber-700" : "bg-jb-50 text-jb-600"
+          }`}
+        >
           <CircleUserRound className="size-7" aria-hidden />
         </span>
         <div className="min-w-0">
-          <p className="text-base font-black text-slate-900">
+          <p className="flex items-center gap-2 text-base font-black text-slate-900">
             {card.customer_name} ({card.customer_age})
+            {isCorporate && (
+              <span className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-bold text-white">
+                법인 사무
+              </span>
+            )}
           </p>
           <p className="flex items-center gap-1.5 text-sm text-slate-500">
             <Clock className="size-3.5" aria-hidden />
-            대기 {card.ticket_number}번 · {card.eta_text}
+            대기 {card.ticket_label}번 · {card.eta_text}
           </p>
         </div>
       </div>
@@ -267,9 +279,6 @@ function Card({
         </p>
         <dl className="divide-y divide-slate-200 text-sm">
           <Row k="방문목적" v={card.purpose} />
-          <Row k="대상" v={card.target} />
-          <Row k="금액" v={card.amount} />
-          <Row k="필요 서류" v={card.required_docs} highlight />
           <Row k="특이사항" v={card.special_notes} />
         </dl>
       </div>

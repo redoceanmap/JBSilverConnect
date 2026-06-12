@@ -13,7 +13,7 @@ class ChatRequest(BaseModel):
 
 
 class HandoffRequest(ChatRequest):
-    user_id: str = Field("user_kim_sonja", description="어르신 사용자 ID")
+    user_id: str = Field("user_kim_sonja", description="고객님 사용자 ID")
 
 
 class ChatReplyResponse(BaseModel):

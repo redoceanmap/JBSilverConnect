@@ -9,8 +9,9 @@ _FALLBACK = VisitBriefing(
     target="—",
     amount="—",
     required_docs="신분증",
-    special_notes="천천히 설명이 필요한 고객입니다.",
-    advice="고객 말씀을 천천히 확인하며 도와드리면 좋아요.",
+    special_notes="—",
+    advice="고객 말씀을 확인하며 도와드리면 좋아요.",
+    window_type="general",
 )
 
 
@@ -39,4 +40,10 @@ def parse_briefing(raw: str) -> VisitBriefing:
         required_docs=str(data.get("required_docs") or _FALLBACK.required_docs),
         special_notes=str(data.get("special_notes") or _FALLBACK.special_notes),
         advice=str(data.get("advice") or _FALLBACK.advice),
+        window_type=_normalize_window_type(data.get("window_type")),
     )
+
+
+def _normalize_window_type(raw: object) -> str:
+    """LLM이 분류한 창구 종류를 정규화한다. 'corporate'만 법인, 그 외/누락은 일반."""
+    return "corporate" if str(raw or "").strip().lower() == "corporate" else "general"

@@ -9,7 +9,7 @@ export function Header() {
           <span className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-b from-jb-500 to-jb-700 text-white shadow-glass">
             <ShieldCheck className="size-6" aria-hidden />
           </span>
-          <span className="text-xl font-black text-jb-700">JB SliverConnect</span>
+          <span className="text-xl font-black text-jb-700">JB AI Connect</span>
         </Link>
       </div>
     </header>

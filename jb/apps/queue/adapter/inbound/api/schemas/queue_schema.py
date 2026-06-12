@@ -8,6 +8,8 @@ class QueueEntryCardResponse(BaseModel):
     customer_name: str
     customer_age: int
     ticket_number: int
+    ticket_label: str
+    window_type: str
     eta_text: str
     purpose: str
     target: str
