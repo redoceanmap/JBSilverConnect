@@ -7,6 +7,7 @@ from jb.apps.branch.adapter.inbound.api import branch_router
 from jb.apps.briefing.adapter.inbound.api import briefing_router
 from jb.apps.chat.adapter.inbound.api import chat_router
 from jb.apps.phishing.adapter.inbound.api import phishing_router
+from jb.apps.queue.adapter.inbound.api import queue_router
 from jb.apps.report.adapter.inbound.api import report_router
 from jb.apps.reservation.adapter.inbound.api import reservation_router
 from jb.apps.savings.adapter.inbound.api import savings_router
@@ -30,6 +31,7 @@ for _router in (
     branch_router,
     report_router,
     chat_router,
+    queue_router,
 ):
     app.include_router(_router, prefix=_API_PREFIX)
 

@@ -254,6 +254,9 @@ export default function ReservationPage() {
           <p className="mt-1 text-lg text-jb-700">{result.purpose} · 내 번호표</p>
           <p className="mt-1 text-6xl font-black text-jb-700">{result.ticket_number}</p>
           <p className="mt-4 text-lg leading-relaxed text-slate-700">{result.message}</p>
+          <p className="mt-4 w-full rounded-2xl bg-white px-4 py-3 text-base font-bold leading-relaxed text-jb-700">
+            번호표를 은행 도착해서 안내데스크에 보여주세요.
+          </p>
           {result.note && (
             <div className="mt-4 w-full rounded-2xl border border-jb-100 bg-white px-4 py-3 text-left">
               <p className="text-sm font-bold text-slate-500">창구 전달 메모</p>

@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --background: #eef2f7;
+  --foreground: #1a2230;
+}
+
+@theme {
+  /* JB 금융그룹 톤 — 짙은 청색(네이비) 신뢰감 */
+  --color-jb-50: #eef4fb;
+  --color-jb-100: #d7e5f4;
+  --color-jb-200: #aecbe9;
+  --color-jb-300: #7ba8d6;
+  --color-jb-400: #4a83c0;
+  --color-jb-500: #2864a6;
+  --color-jb-600: #1a4d8c;
+  --color-jb-700: #003876; /* 메인 브랜드 네이비 */
+  --color-jb-800: #002a59;
+  --color-jb-900: #001c3d;
+
+  /* 시맨틱 — 상태 표시 */
+  --color-safe: #1f8a4c;
+  --color-warning: #d98300;
+  --color-danger: #cf2e2e;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+@theme inline {
+  --font-sans: var(--font-noto-sans-kr), system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-jb-500);
+  outline-offset: 2px;
+}
+
+/* 신규 카드 도착 강조 */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.card-in {
+  animation: card-in 0.35s ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-in {
+    animation: none;
+  }
+}

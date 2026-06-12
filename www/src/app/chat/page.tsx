@@ -197,6 +197,9 @@ export default function ChatPage() {
             <p className="mt-1 text-lg text-jb-700">내 번호표</p>
             <p className="mt-1 text-7xl font-black text-jb-700">{ticket.ticket_number}</p>
             <p className="mt-4 text-lg leading-relaxed text-slate-700">{ticket.message}</p>
+            <p className="mt-4 rounded-2xl bg-jb-50 px-4 py-3 text-base font-bold leading-relaxed text-jb-700">
+              번호표를 은행 도착해서 안내데스크에 보여주세요.
+            </p>
             <button
               type="button"
               onClick={() => setTicket(null)}

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from jb.apps.chat.app.dtos.chat_dto import HandoffCommand, StaffHandoffView
 from jb.apps.chat.app.ports.input.handoff_use_case import HandoffUseCase
 from jb.apps.chat.app.ports.output.handoff_store_port import HandoffStorePort
+from jb.apps.chat.app.ports.output.queue_registrar_port import QueueRegistrarPort
 from jb.apps.chat.app.use_cases.briefing_parser import parse_briefing
 from jb.apps.chat.app.use_cases.conversation_assembler import assemble_conversation
 from jb.apps.chat.app.use_cases.handoff_view_mapper import to_card
@@ -39,10 +41,12 @@ class HandoffInteractor(HandoffUseCase):
         llm: LlmPort,
         store: HandoffStorePort,
         directory: CustomerDirectoryPort,
+        registrar: QueueRegistrarPort,
     ) -> None:
         self._llm = llm
         self._store = store
         self._directory = directory
+        self._registrar = registrar
 
     async def execute(self, command: HandoffCommand) -> StaffHandoffView:
         conversation = assemble_conversation(command.history)
@@ -57,6 +61,7 @@ class HandoffInteractor(HandoffUseCase):
             original_message=_original_message(command),
         )
         await self._store.save(handoff)
+        await self._registrar.register(handoff, datetime.now(timezone.utc))
 
         queue = await self._store.list_active()
         return StaffHandoffView(
