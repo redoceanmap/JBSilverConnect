@@ -86,6 +86,8 @@ export type Branch = {
   name: string;
   distance_meters: number;
   waiting_count: number;
+  latitude: number;
+  longitude: number;
 };
 
 export function findNearbyBranches(

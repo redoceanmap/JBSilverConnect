@@ -7,43 +7,20 @@ import { findNearbyBranches, type Branch } from "@/lib/api";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
   interface Window {
-    kakao: any;
+    naver: any;
   }
 }
 
-const MAP_KEY = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY ?? "";
+const MAP_KEY = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID ?? "";
 
 function formatDistance(meters: number): string {
   if (meters >= 1000) return `${(meters / 1000).toFixed(1)}km`;
   return `${meters}m`;
 }
 
-function initMap(container: HTMLDivElement, lat: number, lng: number) {
-  const center = new window.kakao.maps.LatLng(lat, lng);
-  const map = new window.kakao.maps.Map(container, { center, level: 5 });
-
-  new window.kakao.maps.Marker({ position: center, map });
-
-  const ps = new window.kakao.maps.services.Places();
-  ps.keywordSearch(
-    "전북은행",
-    (data: any[], status: string) => {
-      if (status !== window.kakao.maps.services.Status.OK) return;
-      data.slice(0, 5).forEach((place: any) => {
-        const pos = new window.kakao.maps.LatLng(place.y, place.x);
-        const marker = new window.kakao.maps.Marker({ position: pos, map });
-        const info = new window.kakao.maps.InfoWindow({
-          content: `<div style="padding:6px 10px;font-size:13px;font-weight:bold;white-space:nowrap">${place.place_name}</div>`,
-        });
-        window.kakao.maps.event.addListener(marker, "click", () => info.open(map, marker));
-      });
-    },
-    { location: center, radius: 20000, sort: window.kakao.maps.services.SortBy.DISTANCE },
-  );
-}
-
 export default function BranchPage() {
   const mapRef = useRef<HTMLDivElement>(null);
+  const naverMapRef = useRef<any>(null);
   const [branches, setBranches] = useState<Branch[] | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
 
@@ -63,27 +40,50 @@ export default function BranchPage() {
     }
   }, []);
 
-  // 카카오맵 SDK 동적 로드 후 지도 초기화
+  // 지도 초기화 — userPos 확보되면 바로 실행 (branches 기다리지 않음)
   useEffect(() => {
     if (!userPos || !mapRef.current) return;
     const container = mapRef.current;
     const { lat, lng } = userPos;
 
-    if (window.kakao?.maps) {
-      initMap(container, lat, lng);
+    function initMap() {
+      const center = new window.naver.maps.LatLng(lat, lng);
+      naverMapRef.current = new window.naver.maps.Map(container, { center, zoom: 14 });
+      new window.naver.maps.Marker({ position: center, map: naverMapRef.current });
+    }
+
+    if (window.naver?.maps) {
+      initMap();
       return;
     }
 
     const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${MAP_KEY}&libraries=services`;
-    script.async = true;
-    script.onload = () => initMap(container, lat, lng);
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${MAP_KEY}`;
+    script.onload = initMap;
     document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) document.head.removeChild(script);
-    };
   }, [userPos]);
+
+  // 마커 추가 — branches 도착 후 실행
+  useEffect(() => {
+    if (!branches || !naverMapRef.current || branches.length === 0) return;
+    const bounds = new window.naver.maps.LatLngBounds();
+    branches.forEach((branch) => {
+      const pos = new window.naver.maps.LatLng(branch.latitude, branch.longitude);
+      bounds.extend(pos);
+      const marker = new window.naver.maps.Marker({ position: pos, map: naverMapRef.current });
+      const infoWindow = new window.naver.maps.InfoWindow({
+        content: `<div style="padding:6px 10px;font-size:13px;font-weight:bold;white-space:nowrap">${branch.name}</div>`,
+      });
+      window.naver.maps.Event.addListener(marker, "click", () => {
+        if (infoWindow.getMap()) {
+          infoWindow.close();
+        } else {
+          infoWindow.open(naverMapRef.current, marker);
+        }
+      });
+    });
+    naverMapRef.current.fitBounds(bounds);
+  }, [branches]);
 
   return (
     <>

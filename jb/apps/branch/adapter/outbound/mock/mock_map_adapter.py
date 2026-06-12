@@ -10,7 +10,7 @@ from jb.apps.branch.domain.value_objects.branch_vo import (
 
 
 class MockMapAdapter(MapPort):
-    """데모용 지점 데이터. 실 서비스 전환 시 KakaoMapAdapter로 교체 — 유스케이스 변경 0."""
+    """데모용 지점 데이터. 실 서비스 전환 시 NaverMapAdapter로 교체 — 유스케이스 변경 0."""
 
     async def find_nearby(self, origin: GeoCoordinate, limit: int) -> list[Branch]:
         branches = [

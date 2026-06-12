@@ -14,7 +14,8 @@ class Settings:
 
     gemini_api_key: str
     groq_api_key: str
-    kakao_rest_key: str
+    naver_client_id: str
+    naver_client_secret: str
     demo_user_id: str
 
 
@@ -22,7 +23,8 @@ def load_settings() -> Settings:
     return Settings(
         gemini_api_key=os.getenv("GEMINI_API_KEY", ""),
         groq_api_key=os.getenv("GROQ_API_KEY", ""),
-        kakao_rest_key=os.getenv("KAKAO_REST_KEY", ""),
+        naver_client_id=os.getenv("NAVER_CLIENT_ID", ""),
+        naver_client_secret=os.getenv("NAVER_CLIENT_SECRET", ""),
         demo_user_id=os.getenv("DEMO_USER_ID", "user_kim_sonja"),
     )
 

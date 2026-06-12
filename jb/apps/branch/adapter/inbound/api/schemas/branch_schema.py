@@ -13,3 +13,5 @@ class BranchItem(BaseModel):
     name: str
     distance_meters: int
     waiting_count: int
+    latitude: float
+    longitude: float

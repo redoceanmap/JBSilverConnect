@@ -32,6 +32,8 @@ async def find_nearby_branches(
             name=view.name,
             distance_meters=view.distance_meters,
             waiting_count=view.waiting_count,
+            latitude=view.latitude,
+            longitude=view.longitude,
         )
         for view in views
     ]

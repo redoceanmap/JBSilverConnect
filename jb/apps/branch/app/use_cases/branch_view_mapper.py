@@ -9,4 +9,6 @@ def to_view(branch: Branch) -> BranchView:
         name=branch.name,
         distance_meters=branch.distance.meters,
         waiting_count=branch.wait_status.waiting_count,
+        latitude=branch.coordinate.latitude,
+        longitude=branch.coordinate.longitude,
     )
